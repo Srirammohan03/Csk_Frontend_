@@ -397,7 +397,7 @@ const BuildingDetails = () => {
                 </p>
               )}
 
-              {building.brochureUrl && (
+              {/* {building.brochureUrl && (
                 <Button variant="outline" asChild className="mt-4">
                   <a
                     // href={building.brochureUrl}
@@ -411,11 +411,10 @@ const BuildingDetails = () => {
                     // target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <FileText className="mr-2 h-4 w-4" /> Download Project
-                    Brochure
+                    <FileText className="mr-2 h-4 w-4" /> Download Project Brochure
                   </a>
                 </Button>
-              )}
+              )} */}
 
               {building?.amenities && building?.amenities.length > 0 && (
                 <Card className="mt-4">
