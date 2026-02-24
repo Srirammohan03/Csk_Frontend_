@@ -111,7 +111,7 @@ const TeamManagementTable = () => {
       const { data } = await axios.post(
         `${import.meta.env.VITE_URL}/api/agentlist/addAgentList`,
         payload,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       return data;
     },
@@ -141,7 +141,7 @@ const TeamManagementTable = () => {
       const { data } = await axios.put(
         `${import.meta.env.VITE_URL}/api/agentlist/updateAgent/${id}`,
         payload,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       return data;
     },
@@ -164,7 +164,7 @@ const TeamManagementTable = () => {
       if (!id) throw new Error("Missing agent ID");
       const { data } = await axios.delete(
         `${import.meta.env.VITE_URL}/api/agentlist/deleteAgentList/${id}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       return data;
     },
@@ -385,10 +385,10 @@ const TeamManagementTable = () => {
     });
 
     setSelectedAgent(
-      typeof agent.agentId === "object" ? agent.agentId._id : ""
+      typeof agent.agentId === "object" ? agent.agentId._id : "",
     );
     setSelectedProject(
-      typeof agent.project === "object" ? agent.project._id : ""
+      typeof agent.project === "object" ? agent.project._id : "",
     );
 
     setOpenDialog(true);
@@ -405,7 +405,7 @@ const TeamManagementTable = () => {
           <AlertTriangle className="h-10 w-10" />
           <p className="font-medium text-lg">
             {axios.isAxiosError(error)
-              ? error?.response?.data?.message ?? "Something went wrong"
+              ? (error?.response?.data?.message ?? "Something went wrong")
               : "Something went wrong"}
           </p>
         </div>
@@ -604,8 +604,8 @@ const TeamManagementTable = () => {
                       {isTeamMemLoading
                         ? "Loading available agents..."
                         : teamMemError
-                        ? "Failed to load available agents"
-                        : `${availableAgents?.length ?? 0} agent(s) available`}
+                          ? "Failed to load available agents"
+                          : `${availableAgents?.length ?? 0} agent(s) available`}
                     </div>
                   </div>
                 )}
@@ -650,11 +650,11 @@ const TeamManagementTable = () => {
                     {projectsLoading
                       ? "Loading available projects..."
                       : projectsError
-                      ? (projectsErrorDetails as any)
-                        ? projectsErrorDetails?.message ??
-                          "Failed to load available projects"
-                        : "Failed to load available projects"
-                      : `${projects?.length ?? 0} project(s) available`}
+                        ? (projectsErrorDetails as any)
+                          ? (projectsErrorDetails?.message ??
+                            "Failed to load available projects")
+                          : "Failed to load available projects"
+                        : `${projects?.length ?? 0} project(s) available`}
                   </div>
                 </div>
 
@@ -797,8 +797,8 @@ const TeamManagementTable = () => {
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Agent Name</p>
                   <p>
-                    {typeof viewData.agentId === "object"
-                      ? viewData.agentId.name
+                    {typeof viewData?.agentId === "object"
+                      ? (viewData?.agentId?.name ?? "-")
                       : "-"}
                   </p>
                 </div>
@@ -806,85 +806,85 @@ const TeamManagementTable = () => {
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Contact</p>
                   <p>
-                    {typeof viewData.agentId === "object"
-                      ? viewData.agentId.phone
+                    {typeof viewData?.agentId === "object"
+                      ? (viewData?.agentId?.phone ?? "-")
                       : "-"}
                   </p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">PAN</p>
-                  <p>{viewData.panCard}</p>
+                  <p>{viewData?.panCard ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Aadhar</p>
-                  <p>{viewData.aadharCard}</p>
+                  <p>{viewData?.aadharCard ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Account Holder</p>
-                  <p>{viewData.accountHolderName}</p>
+                  <p>{viewData?.accountHolderName ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Account Number</p>
-                  <p>{viewData.accountNumber}</p>
+                  <p>{viewData?.accountNumber ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">IFSC</p>
-                  <p>{viewData.ifsc}</p>
+                  <p>{viewData?.ifsc ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Bank</p>
-                  <p>{viewData.bankName}</p>
+                  <p>{viewData?.bankName ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Branch</p>
-                  <p>{viewData.branchName}</p>
+                  <p>{viewData?.branchName ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Project</p>
                   <p>
-                    {typeof viewData.project === "object" &&
-                    typeof viewData.project.projectId === "object"
-                      ? viewData.project?.projectId?.projectName || "-"
+                    {typeof viewData?.project === "object" &&
+                    typeof viewData?.project?.projectId === "object"
+                      ? (viewData?.project?.projectId?.projectName ?? "-")
                       : "-"}
                   </p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Total Amount</p>
-                  <p>{viewData.totalAmount}</p>
+                  <p>{viewData?.totalAmount ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Commission %</p>
-                  <p>{viewData.agreedCommissionPercent}</p>
+                  <p>{viewData?.agreedCommissionPercent ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Amount Received</p>
-                  <p>{viewData.amountReceived}</p>
+                  <p>{viewData?.amountReceived ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Commission Paid</p>
-                  <p>{viewData.commissionPaid}</p>
+                  <p>{viewData?.commissionPaid ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20">
                   <p className="font-semibold">Payment Date</p>
-                  <p>{viewData.paymentDate || "-"}</p>
+                  <p>{viewData?.paymentDate ?? "-"}</p>
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20 col-span-full">
                   <p className="font-semibold">Notes</p>
-                  <p>{viewData.notes || "—"}</p>
+                  <p>{viewData?.notes ?? "—"}</p>
                 </div>
               </div>
             </div>

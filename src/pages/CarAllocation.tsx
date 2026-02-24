@@ -33,8 +33,8 @@ import { TeamMember } from "@/utils/leads/LeadConfig";
 // --- Interface Definitions (Ensure these match your backend types) ---
 
 interface AssignedTo {
-  agent: User;
-  assignedUntil: Date;
+  agent: User | null;
+  assignedUntil: Date | null;
 }
 
 interface UsageLog {
@@ -193,12 +193,16 @@ const CarAllocation = () => {
   });
 
   // Filter team members who are not currently assigned to any vehicle
-  const unassignedTeamMembers = teamMembers?.filter((member) => {
-    return !vehicles?.some(
-      (vehicle) =>
-        vehicle.assignedTo && vehicle.assignedTo.agent._id === member._id,
-    );
-  });
+  const assignedUserIds = new Set(
+    vehicles
+      ?.filter((v) => v.assignedTo?.agent?._id)
+      .map((v) => v.assignedTo?.agent?._id)
+      .filter(Boolean),
+  );
+
+  const unassignedTeamMembers = teamMembers?.filter(
+    (member) => !assignedUserIds.has(member.agentId?._id),
+  );
 
   // Update car by id
   const queryClient = useQueryClient();
@@ -411,7 +415,16 @@ const CarAllocation = () => {
       toast.error("Please select a team member and assignment end date.");
       return;
     }
+    const selectedDate = new Date(assignedUntil);
+    const today = new Date();
 
+    // Remove time portion for accurate comparison
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate <= today) {
+      toast.error("Please select a future date for assignment.");
+      return;
+    }
     // Find the full team member object for assignedTo.agent
     const selectedTeamMember = unassignedTeamMembers?.find(
       (member) => member._id === assignedTo,
@@ -419,6 +432,10 @@ const CarAllocation = () => {
 
     if (!selectedTeamMember) {
       toast.error("Selected team member not found or already assigned.");
+      return;
+    }
+    if (!selectedTeamMember?.agentId?._id) {
+      toast.error("Invalid team member data");
       return;
     }
 
@@ -820,7 +837,7 @@ const CarAllocation = () => {
           </Card>
         </div>
 
-        {vehicles.length === 0 ? (
+        {!vehicles || vehicles.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center">
             <p className="text-sm font-medium text-gray-700">
               No Vehicles added
@@ -980,7 +997,7 @@ const CarAllocation = () => {
                                         </SelectItem>
                                       ))
                                     ) : (
-                                      <SelectItem value="" disabled>
+                                      <SelectItem value="no-members" disabled>
                                         No unassigned team members available
                                       </SelectItem>
                                     )}
