@@ -33,8 +33,8 @@ import { TeamMember } from "@/utils/leads/LeadConfig";
 // --- Interface Definitions (Ensure these match your backend types) ---
 
 interface AssignedTo {
-  agent: User;
-  assignedUntil: Date;
+  agent: User | null;
+  assignedUntil: Date | null;
 }
 
 interface UsageLog {
@@ -196,7 +196,8 @@ const CarAllocation = () => {
   const assignedUserIds = new Set(
     vehicles
       ?.filter((v) => v.assignedTo?.agent?._id)
-      .map((v) => v.assignedTo!.agent._id),
+      .map((v) => v.assignedTo?.agent?._id)
+      .filter(Boolean),
   );
 
   const unassignedTeamMembers = teamMembers?.filter(
@@ -431,6 +432,10 @@ const CarAllocation = () => {
 
     if (!selectedTeamMember) {
       toast.error("Selected team member not found or already assigned.");
+      return;
+    }
+    if (!selectedTeamMember?.agentId?._id) {
+      toast.error("Invalid team member data");
       return;
     }
 
@@ -832,7 +837,7 @@ const CarAllocation = () => {
           </Card>
         </div>
 
-        {vehicles.length === 0 ? (
+        {!vehicles || vehicles.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center">
             <p className="text-sm font-medium text-gray-700">
               No Vehicles added
