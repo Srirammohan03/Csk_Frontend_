@@ -162,6 +162,9 @@ import Kanban from "./pages/Kanban";
 import Department from "./pages/Department";
 import { InnerPlotDetails } from "./components/properties/InnerPlotDetails";
 import TrashBuildingsPage from "./pages/TrashBuildingsPage";
+import { OpenPlotDetails } from "./components/properties/OpenPlotDetails";
+import OpenPlotDetailsPage from "./pages/OpenPlotDetailsPage";
+const OpenLandDetailsPage = lazy(() => import("./pages/OpenLandDetailsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -385,7 +388,7 @@ const App = () => {
                   path="/properties/openplot/:id"
                   element={
                     <ProtectedRoute roleSubmodule={"Properties"}>
-                      <OpenPlotsDetails />
+                      <OpenPlotDetailsPage />
                     </ProtectedRoute>
                   }
                 />
@@ -394,7 +397,7 @@ const App = () => {
                   path="/properties/openland/:id"
                   element={
                     <ProtectedRoute roleSubmodule={"Properties"}>
-                      <OpenLandDetails />
+                      <OpenLandDetailsPage />
                     </ProtectedRoute>
                   }
                 />
@@ -424,7 +427,7 @@ const App = () => {
                   }
                 />
                 <Route
-                  path="/inner-detail/:_id"
+                  path="/properties/openplot/:id/inner-detail/:_id"
                   element={
                     <ProtectedRoute roleSubmodule={"Properties"}>
                       <InnerPlotDetails />
