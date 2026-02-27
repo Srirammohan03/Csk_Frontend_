@@ -70,7 +70,11 @@ import {
   fetchCommissionEligibleLeads,
 } from "@/utils/leads/CommissionConfig";
 import { fetchRolePermissions } from "@/utils/units/Methods";
-
+function isObject<T extends object>(
+  value: T | string | undefined | null,
+): value is T {
+  return typeof value === "object" && value !== null;
+}
 const MyCommissions = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("all");
@@ -126,11 +130,13 @@ const MyCommissions = () => {
 
   const addCommissionMutation = useMutation({
     mutationFn: async (
-      newCommission: Omit<Commission, "_id" | "clientId"> & { clientId: string }
+      newCommission: Omit<Commission, "_id" | "clientId"> & {
+        clientId: string;
+      },
     ) => {
       const { data } = await axios.post(
         `${import.meta.env.VITE_URL}/api/commission/addCommissions`,
-        newCommission
+        newCommission,
       );
       return data;
     },
@@ -144,7 +150,7 @@ const MyCommissions = () => {
       toast.error(
         `Failed to add commission: ${
           error.response?.data?.message || error.message
-        }`
+        }`,
       );
     },
   });
@@ -162,7 +168,7 @@ const MyCommissions = () => {
         `${import.meta.env.VITE_URL}/api/commission/updateCommissions/${
           updatedCommissionData._id
         }`,
-        updatedCommissionData
+        updatedCommissionData,
       );
       return data;
     },
@@ -175,7 +181,7 @@ const MyCommissions = () => {
       toast.error(
         `Failed to update commission: ${
           error.response?.data?.message || error.message
-        }`
+        }`,
       );
     },
   });
@@ -199,13 +205,13 @@ const MyCommissions = () => {
   }
 
   const userCanAddUser = rolePermissions?.permissions.some(
-    (per) => per.submodule === "Commissions" && per.actions.write
+    (per) => per.submodule === "Commissions" && per.actions.write,
   );
   const userCanEditUser = rolePermissions?.permissions.some(
-    (per) => per.submodule === "Commissions" && per.actions.edit
+    (per) => per.submodule === "Commissions" && per.actions.edit,
   );
   const userCanDeleteUser = rolePermissions?.permissions.some(
-    (per) => per.submodule === "Commissions" && per.actions.delete
+    (per) => per.submodule === "Commissions" && per.actions.delete,
   );
 
   const actualCommissions: Commission[] = commissions || [];
@@ -270,25 +276,31 @@ const MyCommissions = () => {
       .length,
   };
 
-  const monthlySummaryMap = actualCommissions.reduce((acc, commission) => {
-    const saleDate = new Date(commission.saleDate);
-    const monthYear = format(saleDate, "MMMMyyyy");
-    const monthOnly = format(saleDate, "MMMM");
+  const monthlySummaryMap = actualCommissions.reduce(
+    (acc, commission) => {
+      const saleDate = new Date(commission.saleDate);
+      const monthYear = format(saleDate, "MMMMyyyy");
+      const monthOnly = format(saleDate, "MMMM");
 
-    if (!acc[monthYear]) {
-      acc[monthYear] = {
-        month: monthOnly,
-        sales: 0,
-        amount: 0,
-        sortDate: saleDate,
-      };
-    }
-    acc[monthYear].sales += 1;
-    acc[monthYear].amount += parseFloat(
-      commission.commissionAmount.replace(/[₹,]/g, "")
-    );
-    return acc;
-  }, {} as Record<string, { month: string; sales: number; amount: number; sortDate: Date }>);
+      if (!acc[monthYear]) {
+        acc[monthYear] = {
+          month: monthOnly,
+          sales: 0,
+          amount: 0,
+          sortDate: saleDate,
+        };
+      }
+      acc[monthYear].sales += 1;
+      acc[monthYear].amount += parseFloat(
+        commission.commissionAmount.replace(/[₹,]/g, ""),
+      );
+      return acc;
+    },
+    {} as Record<
+      string,
+      { month: string; sales: number; amount: number; sortDate: Date }
+    >,
+  );
 
   const monthlySummary = Object.values(monthlySummaryMap)
     .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime())
@@ -330,7 +342,7 @@ const MyCommissions = () => {
     const csvRows = filteredCommissions.map((commission) => {
       const saleDateFormatted = format(
         new Date(commission.saleDate),
-        "yyyy-MM-dd"
+        "yyyy-MM-dd",
       );
       const paymentDateFormatted = commission.paymentDate
         ? format(new Date(commission.paymentDate), "yyyy-MM-dd")
@@ -338,7 +350,15 @@ const MyCommissions = () => {
 
       return [
         `"${commission.clientId.addedBy.name}"`, // Access client name from populated Lead's addedBy
-        `"${commission.clientId.property?.projectName}"`, // Access property name from populated Lead's property
+        `"${
+          isObject(commission.clientId.property)
+            ? commission.clientId.property.projectName
+            : isObject(commission.clientId.openPlot)
+              ? commission.clientId.openPlot.projectName
+              : isObject(commission.clientId.openLand)
+                ? commission.clientId.openLand.projectName
+                : "N/A"
+        }"`, // Access property name from populated Lead's property
         `"${commission.clientId.unit?.plotNo}"`,
         `"${commission.clientId?.unit?.totalAmount.toLocaleString("en-IN")}"`,
         `"${commission.commissionAmount}"`,
@@ -359,8 +379,8 @@ const MyCommissions = () => {
       "download",
       `commissions_report_${activeTab}_${format(
         new Date(),
-        "yyyyMMdd_HHmmss"
-      )}.csv`
+        "yyyyMMdd_HHmmss",
+      )}.csv`,
     );
     document.body.appendChild(link);
     link.click();
@@ -389,10 +409,10 @@ const MyCommissions = () => {
       _id: commission._id,
       clientId: commission.clientId._id,
       commissionAmount: parseFloat(
-        commission.commissionAmount.replace(/[₹,]/g, "")
+        commission.commissionAmount.replace(/[₹,]/g, ""),
       ).toString(),
       commissionPercent: parseFloat(
-        commission.commissionPercent.replace(/%/, "")
+        commission.commissionPercent.replace(/%/, ""),
       ).toString(),
       saleDate: new Date(commission.saleDate),
       paymentDate: commission.paymentDate
@@ -420,7 +440,7 @@ const MyCommissions = () => {
 
   const handleDateChange = (
     date: Date | undefined,
-    field: "saleDate" | "paymentDate"
+    field: "saleDate" | "paymentDate",
   ) => {
     setCommissionFormData((prev) => ({
       ...prev,
@@ -464,7 +484,7 @@ const MyCommissions = () => {
 
     const formattedPayload = {
       commissionAmount: `₹${parseFloat(
-        commissionFormData.commissionAmount
+        commissionFormData.commissionAmount,
       ).toLocaleString("en-IN")}`,
       commissionPercent: `${parseFloat(commissionFormData.commissionPercent)}%`,
       saleDate: commissionFormData.saleDate.toISOString(),
@@ -560,7 +580,7 @@ const MyCommissions = () => {
                 <ArrowUpRight className="mr-1 h-4 w-4" />
                 <span className="text-xs">
                   {parseFloat(
-                    commissionSummary.thisMonth.replace(/[₹,]/g, "")
+                    commissionSummary.thisMonth.replace(/[₹,]/g, ""),
                   ) >
                   parseFloat(commissionSummary.lastMonth.replace(/[₹,]/g, ""))
                     ? "+ Increased"
@@ -714,7 +734,7 @@ const MyCommissions = () => {
                             {commission.saleDate
                               ? format(
                                   new Date(commission.saleDate),
-                                  "MMM d, yyyy"
+                                  "MMM d, yyyy",
                                 )
                               : "N/A"}
                           </TableCell>
@@ -948,7 +968,7 @@ const MyCommissions = () => {
                         {selectedCommission.saleDate
                           ? format(
                               new Date(selectedCommission.saleDate),
-                              "MMMM d, yyyy"
+                              "MMMM d, yyyy",
                             )
                           : "N/A"}
                       </p>
@@ -993,7 +1013,7 @@ const MyCommissions = () => {
                         <p className="font-medium">
                           {format(
                             new Date(selectedCommission.paymentDate),
-                            "MMMM d, yyyy"
+                            "MMMM d, yyyy",
                           )}
                         </p>
                       </div>
@@ -1011,7 +1031,7 @@ const MyCommissions = () => {
                       {selectedCommission.saleDate
                         ? format(
                             addDays(new Date(selectedCommission.saleDate), 15),
-                            "MMMM d, yyyy"
+                            "MMMM d, yyyy",
                           )
                         : "N/A"}
                     </p>
@@ -1067,8 +1087,8 @@ const MyCommissions = () => {
                           isLeadsLoading
                             ? "Loading leads..."
                             : actualCommissionEligibleLeads.length === 0
-                            ? "No eligible leads available"
-                            : "Select a client/property"
+                              ? "No eligible leads available"
+                              : "Select a client/property"
                         }
                       />
                     </SelectTrigger>
@@ -1077,8 +1097,20 @@ const MyCommissions = () => {
                         actualCommissionEligibleLeads.map((lead) => (
                           <SelectItem key={lead._id} value={lead._id}>
                             {lead.name || "N/A"} -{" "}
-                            {lead.property?.projectName || "N/A"} (
-                            {lead.unit?.plotNo || "N/A"})
+                            {isObject(lead.property)
+                              ? lead.property.projectName
+                              : isObject(lead.openPlot)
+                                ? lead.openPlot.projectName
+                                : isObject(lead.openLand)
+                                  ? lead.openLand.projectName
+                                  : "N/A"}{" "}
+                            (
+                            {isObject(lead.unit)
+                              ? lead.unit.plotNo
+                              : isObject(lead.innerPlot)
+                                ? lead.innerPlot.plotNo
+                                : "N/A"}
+                            )
                           </SelectItem>
                         ))
                       ) : (
@@ -1133,7 +1165,7 @@ const MyCommissions = () => {
                       variant={"outline"}
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !commissionFormData.saleDate && "text-muted-foreground"
+                        !commissionFormData.saleDate && "text-muted-foreground",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
@@ -1165,7 +1197,7 @@ const MyCommissions = () => {
                         className={cn(
                           "w-full justify-start text-left font-normal",
                           !commissionFormData.paymentDate &&
-                            "text-muted-foreground"
+                            "text-muted-foreground",
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
@@ -1225,8 +1257,8 @@ const MyCommissions = () => {
                       ? "Saving..."
                       : "Save Changes"
                     : addCommissionMutation.isPending
-                    ? "Adding..."
-                    : "Add Commission"}
+                      ? "Adding..."
+                      : "Add Commission"}
                 </Button>
               </DialogFooter>
             </form>
